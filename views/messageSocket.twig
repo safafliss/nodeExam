@@ -1,0 +1,69 @@
+<html>
+    <head>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <h1>Message</h1>
+        <label for="pseudo">Pseudo</label><input type="text" id="pseudo">
+        <label for="content">Content</label><input type="text" id="content">
+        <input type="submit" onClick="send()" value="Envoyer">
+        <div id="feedback"></div>
+        <div id="nbUsers"></div>
+        <script>
+            const socket = io.connect();
+
+            //listen for the "msg" event
+            socket.on("msg",(data)=>{
+            p = document.createElement("p");
+            p.innerText = (data);
+            document.body.append(p);
+            })
+
+
+            socket.on('userDisconnected', (data) => {
+                // Display the notification message to the user
+                p = document.createElement("p");
+                p.innerText = (data);
+                document.body.append(p);
+            });
+
+
+            function send(){
+                x= document.getElementById("pseudo").value;
+                y= document.getElementById("content").value;
+                socket.emit("msg",x,y);
+            }
+
+            {# y= prompt("type name")
+            //x= document.getElementById("pseudo").value;
+            document.getElementById("content").addEventListener('keypress', () => {socket.emit('typing', y);});
+            socket.on("typing", (name) => {
+            feedback.innerHTML = `<p><em>${name}</em> is typing...</p>`;
+            //prompt(name,"is typing...");
+            setTimeout(() => {
+                feedback.innerHTML = "";
+            }, 3000);
+            }); #}
+
+
+            
+            socket.on('updateNumUsersOnline', (num_users_online) => {
+                const nbUsers = document.getElementById('nbUsers');
+                nbUsers.innerHTML = `<h3> ${num_users_online} User(s) Online</h3>`;
+            });
+
+
+
+            let field=document.getElementById("content")
+            field.addEventListener('keyup', () => {
+            let name= document.getElementById("pseudo").value
+            socket.emit('typing', name);
+            });
+
+            socket.on('notification', (name) => {
+                const message = `${name} is typing`;
+                alert(message);
+            });
+        </script>
+    </body>
+</html>
